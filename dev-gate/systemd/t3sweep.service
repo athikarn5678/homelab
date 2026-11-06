@@ -1,0 +1,7 @@
+[Unit]
+Description=Revoke T3 sessions older than SESSION_MAX_AGE_HOURS
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/t3gate.env
+ExecStart=/usr/bin/node %h/dev-gate/sweep.js

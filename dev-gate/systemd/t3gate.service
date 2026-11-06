@@ -1,0 +1,13 @@
+[Unit]
+Description=T3 auto-login gate (behind Cloudflare Access)
+After=network-online.target t3code.service
+
+[Service]
+EnvironmentFile=%h/.config/t3gate.env
+ExecStart=/usr/bin/node %h/dev-gate/gate.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target
