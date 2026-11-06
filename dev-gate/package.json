@@ -1,15 +1,13 @@
 {
-  "name": "pair",
+  "name": "dev-gate",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Cloudflare Access auto-login proxy for T3 Code with logout and session sweep",
+  "private": true,
+  "main": "gate.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node gate.js",
+    "sweep": "node sweep.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "http-proxy": "^1.18.1"
   }
