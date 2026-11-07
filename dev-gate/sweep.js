@@ -6,6 +6,7 @@ if (!(MAX_AGE_HOURS > 0)) {
 }
 const MAX_AGE_MS = MAX_AGE_HOURS * 3600 * 1000;
 const dry = process.argv.includes('--dry');
+const all = process.argv.includes('--all');
 (async () => {
   const list = await t3.listSessions();
   const now = Date.now();
@@ -15,7 +16,7 @@ const dry = process.argv.includes('--dry');
     const t = t3.issuedMs(e);
     if (!id || isNaN(t)) { console.log('skip, unrecognized fields:', Object.keys(e)); continue; }
     const ageH = ((now - t) / 3600000).toFixed(1);
-    if (now - t > MAX_AGE_MS) {
+    if (all || now - t > MAX_AGE_MS) {
       console.log((dry ? 'would revoke ' : 'revoke ') + id + ' age ' + ageH + 'h');
       if (!dry) await t3.revoke(id);
       n++;

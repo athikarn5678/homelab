@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily 05:00 (Bangkok) reset of all T3 sessions
+
+[Timer]
+OnCalendar=*-*-* 05:00:00 Asia/Bangkok
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Revoke ALL T3 sessions at boot
+After=t3code.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 30
+EnvironmentFile=%h/.config/t3gate.env
+ExecStart=/usr/bin/node %h/dev-gate/sweep.js --all
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

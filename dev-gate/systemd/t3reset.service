@@ -1,0 +1,8 @@
+[Unit]
+Description=Revoke ALL T3 sessions
+After=t3code.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/t3gate.env
+ExecStart=/usr/bin/node %h/dev-gate/sweep.js --all
