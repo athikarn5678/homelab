@@ -14,6 +14,8 @@ const T3 = process.env.T3_URL || 'http://127.0.0.1:3773';
 const HOST = required('PUBLIC_HOST');
 const PUBLIC = 'https://' + HOST;
 const ACCESS_LOGOUT = required('ACCESS_LOGOUT_URL');
+const COOKIE_DOMAIN = (process.env.COOKIE_DOMAIN || '').replace(/^\./, '');
+const DOMAIN_ATTR = COOKIE_DOMAIN ? '; Domain=' + COOKIE_DOMAIN : '';
 const ACCESS_HDR = 'cf-access-authenticated-user-email';
 const OWN = (n) => n.startsWith('t3_session') || n === 't3gate_try' || n === 't3gate_id';
 
@@ -49,8 +51,13 @@ const server = http.createServer(async (req, res) => {
   const cookie = req.headers.cookie || '';
 
   if (req.method === 'GET' && req.url.split('?')[0] === '/logout') {
+    const ATTRS = '=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax';
     const expire = cookie.split(';').map((c) => c.trim().split('=')[0]).filter(OWN)
-      .map((n) => n + '=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax');
+      .filter((n) => n !== 't3gate_id')
+      .map((n) => n + ATTRS);
+    // t3gate_id may have been set host-only (older) or with Domain; expire both.
+    expire.push('t3gate_id' + ATTRS);
+    if (COOKIE_DOMAIN) expire.push('t3gate_id' + ATTRS + DOMAIN_ATTR);
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=utf-8',
       'Clear-Site-Data': '"cookies"',
@@ -77,7 +84,7 @@ const server = http.createServer(async (req, res) => {
         const cookies = r.headers.getSetCookie()
           .map((c) => (/;\s*secure/i.test(c) ? c : c + '; Secure'));
         cookies.push('t3gate_try=1; Max-Age=10; Path=/; HttpOnly; Secure; SameSite=Lax');
-        cookies.push('t3gate_id=' + rand + '; Max-Age=2592000; Path=/; HttpOnly; Secure; SameSite=Lax');
+        cookies.push('t3gate_id=' + rand + '; Max-Age=2592000; Path=/; HttpOnly; Secure; SameSite=Lax' + DOMAIN_ATTR);
         res.writeHead(302, { Location: req.url, 'Set-Cookie': cookies, 'Cache-Control': 'no-store' }).end();
         return;
       }

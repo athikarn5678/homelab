@@ -31,7 +31,14 @@ T3 Code (127.0.0.1:3773)
   A random id cookie (`t3gate_id`) remembers which label belongs to this browser.
 - **`/logout`:** clears the T3 session cookies and the gate's own cookies (`Set-Cookie` and
   `Clear-Site-Data`), revokes that browser's server-side session by its `gate-<id>` label,
-  then redirects to the Cloudflare Access logout URL.
+  then redirects to the Cloudflare Access logout URL. It does not depend on the `Host` header
+  (any host that reaches the gate behaves the same) but still requires the Cf-Access header.
+  With `COOKIE_DOMAIN` set, `t3gate_id` is expired both with and without the `Domain` attribute.
+- **code-server `/logout` route:** to make logout work from a second host (e.g.
+  `code.example.com`), route that host's `/logout` **path** through the tunnel to the gate
+  (`http://127.0.0.1:3774`) and everything else to code-server. Set `COOKIE_DOMAIN=example.com`
+  so the browser sends `t3gate_id` to that host as well; the `t3_session*` cookies stay
+  host-only, and the session is revoked server-side by the `gate-<id>` label.
 - **Hourly sweep:** `sweep.js` (run by a systemd timer) revokes every T3 session older than
   `SESSION_MAX_AGE_HOURS` (default 12). Use `node sweep.js --dry` to preview.
 
@@ -69,6 +76,7 @@ Point the tunnel's ingress for your hostname at `http://127.0.0.1:3774`.
 | `PUBLIC_HOST` | yes | | gate (public hostname behind Access) |
 | `ACCESS_LOGOUT_URL` | yes | | gate (post-logout redirect) |
 | `PORT` | no | `3774` | gate |
+| `COOKIE_DOMAIN` | no | unset (host-only) | gate (`Domain=` for `t3gate_id`, e.g. `example.com`) |
 | `T3_URL` | no | `http://127.0.0.1:3773` | gate |
 | `SESSION_MAX_AGE_HOURS` | no | `12` | sweep |
 
